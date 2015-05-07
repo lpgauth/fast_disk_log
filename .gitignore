@@ -1,0 +1,3 @@
+.rebar
+ebin
+erl_crash.dump
