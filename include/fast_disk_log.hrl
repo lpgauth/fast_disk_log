@@ -7,7 +7,7 @@
 -define(TABLE_NAME, fast_disk_log_manager).
 
 %% defaults
--define(DEFAULT_MAX_BUFFER_SIZE, 2048).
+-define(DEFAULT_MAX_BUFFER_SIZE, 8388608).
 -define(DEFAULT_MAX_DELAY, 2000).
 -define(DEFAULT_POOL_SIZE, 4).
 
