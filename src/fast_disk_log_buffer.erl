@@ -9,6 +9,7 @@
 -record(state, {
     buffer = [],
     buffer_size = 0,
+    name,
     max_buffer_size,
     max_delay,
     timer_ref,
@@ -21,9 +22,12 @@
 init(Parent, Name, Writer) ->
     register(Name, self()),
     proc_lib:init_ack(Parent, {ok, self()}),
+
     MaxBufferSize = ?ENV(buffer_size, ?DEFAULT_MAX_BUFFER_SIZE),
     MaxDelay = ?ENV(delay, ?DEFAULT_MAX_DELAY),
+
     loop(#state {
+        name = Name,
         max_buffer_size = MaxBufferSize,
         max_delay = MaxDelay,
         timer_ref = new_timer(MaxDelay),
@@ -36,6 +40,30 @@ start_link(Name, Writer) ->
     proc_lib:start_link(?MODULE, init, [self(), Name, Writer]).
 
 %% private
+handle_msg(close, #state {
+        buffer = Buffer,
+        name = Name,
+        timer_ref = TimerRef,
+        writer = Writer
+    }) ->
+
+    Writer ! {write, lists:reverse(Buffer)},
+    erlang:cancel_timer(TimerRef),
+    ok = supervisor:terminate_child(?SUPERVISOR, Name);
+handle_msg(sync, #state {
+        buffer = Buffer,
+        writer = Writer
+    } = State) ->
+
+    write(Writer, Buffer),
+    reset_buffer(State);
+handle_msg(timeout, #state {
+        buffer = Buffer,
+        writer = Writer
+    } = State) ->
+
+    write(Writer, Buffer),
+    reset_buffer(State);
 handle_msg({log, Bin}, #state {
         buffer = Buffer,
         buffer_size = BufferSize,
@@ -47,32 +75,15 @@ handle_msg({log, Bin}, #state {
     case BufferSize + size(Bin) of
         X when X >= MaxBufferSize ->
             write(Writer, NewBuffer),
-
-            {ok, State#state {
-                buffer = [],
-                buffer_size = 0
-            }};
+            reset_buffer(State);
         NewBufferSize ->
             {ok, State#state {
                 buffer = NewBuffer,
                 buffer_size = NewBufferSize
             }}
     end;
-handle_msg(timeout, #state {
-        buffer = Buffer,
-        max_delay = MaxDelay,
-        writer = Writer
-    } = State) ->
-
-    write(Writer, Buffer),
-
-    {ok, State#state {
-        buffer = [],
-        buffer_size = 0,
-        timer_ref = new_timer(MaxDelay)
-    }};
 handle_msg(Msg, State) ->
-    io:format("unknown msg: ~p~n", [Msg]),
+    ?ERROR_MSG("unknown msg: ~p~n", [Msg]),
     {ok, State}.
 
 loop(State) ->
@@ -84,8 +95,19 @@ loop(State) ->
 new_timer(Time) ->
     erlang:send_after(Time, self(), timeout).
 
+reset_buffer(#state {
+        max_delay = MaxDelay,
+        timer_ref = TimerRef
+    } = State) ->
+
+    erlang:cancel_timer(TimerRef),
+    {ok, State#state {
+        buffer = [],
+        buffer_size = 0,
+        timer_ref = new_timer(MaxDelay)
+    }}.
+
 write(_Writer, []) ->
     ok;
 write(Writer, Buffer) ->
     Writer ! {write, lists:reverse(Buffer)}.
-

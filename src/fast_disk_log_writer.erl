@@ -7,7 +7,8 @@
 ]).
 
 -record(state, {
-    fd
+    fd,
+    name
 }).
 
 %% public
@@ -19,7 +20,10 @@ init(Parent, Name, Filename) ->
 
     case file:open(Filename, [append, raw]) of
         {ok, Fd} ->
-            loop(#state {fd = Fd});
+            loop(#state {
+                name = Name,
+                fd = Fd
+            });
         {error, _Reason} ->
             % TODO
             ok
@@ -31,16 +35,40 @@ start_link(Name, Filename) ->
     proc_lib:start_link(?MODULE, init, [self(), Name, Filename]).
 
 %% private
-handle_msg({write, Bin}, #state {fd = Fd} = State) ->
-    Timestamp = os:timestamp(),
-    case file:write(Fd, Bin) of
+close_wait(0) ->
+    [];
+close_wait(N) ->
+    receive
+        {write, Buffer} ->
+            [Buffer | close_wait(N - 1)]
+    after ?CLOSE_TIMEOUT ->
+        []
+    end.
+
+handle_msg({close, PoolSize}, #state {
+        fd = Fd,
+        name = Name
+    }) ->
+
+    Buffer = lists:reverse(close_wait(PoolSize)),
+    case file:write(Fd, Buffer) of
         ok ->
-            Diff = timer:now_diff(os:timestamp(), Timestamp),
-            case Diff of
-                X when X > 10000 ->
-                    io:format("time: ~p~n", [Diff]);
-                _ -> ok
-            end,
+            ok;
+        {error, _Reason} ->
+            % TODO
+            ok
+    end,
+    case file:close(Fd) of
+        ok ->
+            ok;
+        {error, _Reason2} ->
+            % TODO
+            ok
+    end,
+    supervisor:terminate_child(?SUPERVISOR, Name);
+handle_msg({write, Buffer}, #state {fd = Fd} = State) ->
+    case file:write(Fd, Buffer) of
+        ok ->
             ok;
         {error, _Reason} ->
             % TODO
@@ -48,7 +76,7 @@ handle_msg({write, Bin}, #state {fd = Fd} = State) ->
     end,
     {ok, State};
 handle_msg(Msg, State) ->
-    io:format("unknown msg: ~p~n", [Msg]),
+    ?ERROR_MSG("unknown msg: ~p~n", [Msg]),
     {ok, State}.
 
 loop(State) ->
