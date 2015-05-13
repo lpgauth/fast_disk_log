@@ -10,7 +10,7 @@
 ]).
 
 %% public
--spec close(atom()) -> ok | {error, no_such_log}.
+-spec close(name()) -> ok | {error, no_such_log}.
 
 close(Name) ->
     case lookup_element(Name) of
@@ -25,12 +25,12 @@ close(Name) ->
             end
     end.
 
--spec open(atom(), binary()) -> ok | {error, name_already_open}.
+-spec open(name(), filename()) -> ok | {error, name_already_open}.
 
 open(Name, Filename) ->
     open(Name, Filename, []).
 
--spec open(atom(), binary(), open_options()) -> ok | {error, name_already_open}.
+-spec open(name(), filename(), open_options()) -> ok | {error, name_already_open}.
 
 open(Name, Filename, Opts) ->
     PoolSize = ?LOOKUP(pool_size, Opts, ?DEFAULT_POOL_SIZE),
@@ -44,7 +44,7 @@ open(Name, Filename, Opts) ->
             ok
     end.
 
--spec log(atom(), binary()) -> ok | {error, no_such_log}.
+-spec log(name(), binary()) -> ok | {error, no_such_log}.
 
 log(Name, Bin) ->
     case lookup_element(Name) of
@@ -55,7 +55,7 @@ log(Name, Bin) ->
             ok
     end.
 
--spec sync(atom()) -> ok | {error, no_such_log}.
+-spec sync(name()) -> ok | {error, no_such_log}.
 
 sync(Name) ->
     case lookup_element(Name) of
@@ -67,7 +67,8 @@ sync(Name) ->
 
 %% private
 buffer_worker(Name, N) ->
-    list_to_atom(atom_to_list(Name) ++ "_buffer_" ++ integer_to_list(N)).
+    Buffer = <<Name/binary, "_buffer_", (integer_to_binary(N))/binary>>,
+    binary_to_atom(Buffer, latin1).
 
 delete_buffer_child(Name, N) ->
     Buffer = buffer_worker(Name, N),
@@ -113,4 +114,5 @@ start_writer_child(Name, Filename) ->
     {ok, _Pid} = supervisor:start_child(?SUPERVISOR, Spec).
 
 writer_worker(Name) ->
-    list_to_atom(atom_to_list(Name) ++ "_writer").
+    Writer = <<Name/binary, "_writer">>,
+    binary_to_atom(Writer, latin1).

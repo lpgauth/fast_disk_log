@@ -16,7 +16,8 @@
 
 %% types
 -type filename() :: file:name_all().
--type open_option() :: pool_size.
+-type name() :: binary().
+-type open_option() :: {pool_size, pos_integer()}.
 -type open_options() :: [open_option()].
 
 %% logging
