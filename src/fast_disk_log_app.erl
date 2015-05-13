@@ -12,8 +12,9 @@
 ]).
 
 %% public
+-spec start() -> ok.
 start() ->
-    {ok, _} = application:ensure_all_started(?APP).
+    application:start(?APP).
 
 %% application callbacks
 start(_StartType, _StartArgs) ->

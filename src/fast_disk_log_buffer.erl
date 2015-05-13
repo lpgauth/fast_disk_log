@@ -23,8 +23,8 @@ init(Parent, Name, Writer) ->
     register(Name, self()),
     proc_lib:init_ack(Parent, {ok, self()}),
 
-    MaxBufferSize = ?ENV(buffer_size, ?DEFAULT_MAX_BUFFER_SIZE),
-    MaxDelay = ?ENV(delay, ?DEFAULT_MAX_DELAY),
+    MaxBufferSize = ?ENV(max_size, ?DEFAULT_MAX_SIZE),
+    MaxDelay = ?ENV(max_delay, ?DEFAULT_MAX_DELAY),
 
     loop(#state {
         name = Name,
