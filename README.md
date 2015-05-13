@@ -17,15 +17,15 @@ Pool-based asynchronous Erlang disk logger
   </theader>
   <tr>
     <td>max_delay</td>
-    <td>pos_integer_()</td>
+    <td>pos_integer()</td>
     <td>2000</td>
-    <td>max delay time before flush to writer</td>
+    <td>maximum delay time before flush to writer</td>
   </tr>
   <tr>
     <td>max_size</td>
-    <td>pos_integer_()</td>
+    <td>pos_integer()</td>
     <td>8000000</td>
-    <td>max buffer size before flush to writer</td>
+    <td>maximum buffer size before flush to writer</td>
   </tr>
 </table>
 
