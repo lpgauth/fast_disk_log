@@ -52,31 +52,25 @@ handle_msg({close, PoolSize}, #state {
 
     Buffer = lists:reverse(close_wait(PoolSize)),
     case file:write(Fd, Buffer) of
-        ok ->
-            ok;
-        {error, _Reason} ->
-            % TODO
-            ok
+        ok -> ok;
+        {error, Reason} ->
+            ?ERROR_MSG("failed to write: ~p~n", [Reason])
     end,
     case file:close(Fd) of
-        ok ->
-            ok;
-        {error, _Reason2} ->
-            % TODO
-            ok
+        ok -> ok;
+        {error, Reason2} ->
+            ?ERROR_MSG("failed to close: ~p~n", [Reason2])
     end,
     supervisor:terminate_child(?SUPERVISOR, Name);
 handle_msg({write, Buffer}, #state {fd = Fd} = State) ->
     case file:write(Fd, Buffer) of
-        ok ->
-            ok;
-        {error, _Reason} ->
-            % TODO
-            ok
+        ok -> ok;
+        {error, Reason} ->
+            ?ERROR_MSG("failed to write: ~p~n", [Reason])
     end,
     {ok, State};
 handle_msg(Msg, State) ->
-    ?ERROR_MSG("unknown msg: ~p~n", [Msg]),
+    ?WARNING_MSG("unknown msg: ~p~n", [Msg]),
     {ok, State}.
 
 loop(State) ->

@@ -26,6 +26,7 @@ close(Name) ->
     end.
 
 -spec open(atom(), binary()) -> ok | {error, name_already_open}.
+
 open(Name, Filename) ->
     open(Name, Filename, []).
 
@@ -36,10 +37,11 @@ open(Name, Filename, Opts) ->
     case ets:insert_new(?TABLE_NAME, {Name, PoolSize}) of
         false -> {error, name_already_open};
         true ->
-            [delete_child(buffer_worker(Name, N)) || N <- lists:seq(1, PoolSize)],
-            delete_child(writer_worker(Name)),
+            delete_buffer_children(Name, PoolSize),
+            delete_writer_child(Name),
             start_writer_child(Name, Filename),
-            start_buffer_children(Name, PoolSize)
+            start_buffer_children(Name, PoolSize),
+            ok
     end.
 
 -spec log(atom(), binary()) -> ok | {error, no_such_log}.
@@ -67,8 +69,16 @@ sync(Name) ->
 buffer_worker(Name, N) ->
     list_to_atom(atom_to_list(Name) ++ "_buffer_" ++ integer_to_list(N)).
 
-delete_child(Name) ->
-    supervisor:delete_child(?SUPERVISOR, Name).
+delete_buffer_child(Name, N) ->
+    Buffer = buffer_worker(Name, N),
+    supervisor:delete_child(?SUPERVISOR, Buffer).
+
+delete_buffer_children(Name, PoolSize) ->
+    [delete_buffer_child(Name, N) || N <- lists:seq(1, PoolSize)].
+
+delete_writer_child(Name) ->
+    Writer = writer_worker(Name),
+    supervisor:delete_child(?SUPERVISOR, Writer).
 
 lookup_element(Key) ->
     try ets:lookup_element(?TABLE_NAME, Key, 2)

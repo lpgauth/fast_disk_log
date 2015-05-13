@@ -5,7 +5,8 @@
     env/2,
     error_msg/2,
     lookup/3,
-    random/1
+    random/1,
+    warning_msg/2
 ]).
 
 %% public
@@ -23,3 +24,6 @@ lookup(Key, List, Default) ->
 
 random(N) ->
     erlang:phash2({self(), os:timestamp()}, N).
+
+warning_msg(Format, Data) ->
+    error_logger:error_msg(Format, Data).

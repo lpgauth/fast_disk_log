@@ -83,7 +83,7 @@ handle_msg({log, Bin}, #state {
             }}
     end;
 handle_msg(Msg, State) ->
-    ?ERROR_MSG("unknown msg: ~p~n", [Msg]),
+    ?WARNING_MSG("unknown msg: ~p~n", [Msg]),
     {ok, State}.
 
 loop(State) ->
