@@ -12,20 +12,20 @@
 }).
 
 %% public
--spec init(pid(), atom(), filename()) -> no_return().
+-spec init(pid(), atom(), filename()) -> ok | no_return().
 
 init(Parent, Name, Filename) ->
-    register(Name, self()),
-    proc_lib:init_ack(Parent, {ok, self()}),
-
     case file:open(Filename, [append, raw]) of
         {ok, Fd} ->
+            register(Name, self()),
+            proc_lib:init_ack(Parent, {ok, self()}),
+
             loop(#state {
                 name = Name,
                 fd = Fd
             });
-        {error, _Reason} ->
-            % TODO
+        {error, Reason} ->
+            ?ERROR_MSG("failed to open file: ~p ~p~n", [Reason, Filename]),
             ok
     end.
 
