@@ -1,4 +1,6 @@
-# fast disk log #
+# fast disk log
+
+__Author:__ Louis-Philippe Gauthier.
 
 Pool-based asynchronous Erlang disk logger
 
