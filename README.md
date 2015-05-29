@@ -4,6 +4,8 @@ __Author:__ Louis-Philippe Gauthier.
 
 Pool-based asynchronous Erlang disk logger
 
+[![Build Status](https://travis-ci.org/lpgauth/fast_disk_log.svg?branch=dev)](https://travis-ci.org/lpgauth/fast_disk_log)
+
 ### Requirements
 
 * Erlang 16B03-1 +
