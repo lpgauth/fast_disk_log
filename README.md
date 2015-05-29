@@ -6,7 +6,7 @@ Pool-based asynchronous Erlang disk logger
 
 ### Requirements
 
-* Erlang 17.0 +
+* Erlang 16B03-1 +
 
 ### Environment variables
 
