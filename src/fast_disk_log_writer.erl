@@ -45,11 +45,10 @@ close_wait(N) ->
         []
     end.
 
-handle_msg({close, PoolSize}, #state {
+handle_msg({close, PoolSize, Pid}, #state {
         fd = Fd,
         name = Name
     }) ->
-
     Buffer = lists:reverse(close_wait(PoolSize)),
     case file:write(Fd, Buffer) of
         ok -> ok;
@@ -61,7 +60,8 @@ handle_msg({close, PoolSize}, #state {
         {error, Reason2} ->
             ?ERROR_MSG("failed to close: ~p~n", [Reason2])
     end,
-    supervisor:terminate_child(?SUPERVISOR, Name);
+    Pid ! {fast_disk_log, {closed, Name}},
+    ok = supervisor:terminate_child(?SUPERVISOR, Name);
 handle_msg({write, Buffer}, #state {fd = Fd} = State) ->
     case file:write(Fd, Buffer) of
         ok -> ok;
