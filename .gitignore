@@ -1,3 +1,9 @@
+*.beam
+*.o
+*.plt
+.eunit
 .rebar
-ebin
+deps/
+doc/README.md
+ebin/
 erl_crash.dump

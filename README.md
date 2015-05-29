@@ -54,6 +54,14 @@ ok
 {error,no_such_log}
 ```
 
+## Tests
+
+```makefile
+make eunit
+make build-plt && make dialyze
+make xref
+```
+
 ## License
 
 ```license
