@@ -7,3 +7,4 @@ deps/
 doc/README.md
 ebin/
 erl_crash.dump
+test.log

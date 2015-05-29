@@ -20,8 +20,12 @@ close(Name) ->
                 0 -> {error, no_such_log};
                 1 ->
                     msg_buffer_workers(Name, PoolSize, close),
-                    msg_writter_worker(Name, {close, PoolSize}),
-                    ok
+                    msg_writter_worker(Name, {close, PoolSize, self()}),
+                    Writer = writer_worker(Name),
+                    receive
+                        {fast_disk_log, {closed, Writer}} ->
+                            ok
+                    end
             end
     end.
 
@@ -37,8 +41,8 @@ open(Name, Filename, Opts) ->
     case ets:insert_new(?TABLE_NAME, {Name, PoolSize}) of
         false -> {error, name_already_open};
         true ->
-            delete_buffer_children(Name, PoolSize),
             delete_writer_child(Name),
+            delete_buffer_children(Name, PoolSize),
             start_writer_child(Name, Filename),
             start_buffer_children(Name, PoolSize),
             ok
