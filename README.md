@@ -29,6 +29,9 @@ Pool-based asynchronous Erlang disk logger
   </tr>
 </table>
 
+## API
+<a href="http://github.com/lpgauth/fast_disk_log/blob/master/doc/fast_disk_log.md#index" class="module">Function Index</a>
+
 ## Examples
 
 ```erlang
@@ -53,6 +56,7 @@ ok
 
 ## License
 
+```license
 The MIT License (MIT)
 
 Copyright (c) 2015 Louis-Philippe Gauthier
@@ -74,3 +78,4 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+```
