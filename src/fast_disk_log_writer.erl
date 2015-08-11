@@ -68,9 +68,6 @@ handle_msg({write, Buffer}, #state {fd = Fd} = State) ->
         {error, Reason} ->
             ?ERROR_MSG("failed to write: ~p~n", [Reason])
     end,
-    {ok, State};
-handle_msg(Msg, State) ->
-    ?WARNING_MSG("unknown msg: ~p~n", [Msg]),
     {ok, State}.
 
 loop(State) ->

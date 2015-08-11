@@ -11,11 +11,15 @@
 ]).
 
 %% public
+-spec start_link() -> {ok, pid()}.
+
 start_link() ->
     init_table(),
     supervisor:start_link({local, ?MODULE}, ?MODULE, []).
 
 %% supervisor callbacks
+-spec init([]) -> {ok, {{one_for_one, 5, 10}, []}}.
+
 init([]) ->
     {ok, {{one_for_one, 5, 10}, []}}.
 

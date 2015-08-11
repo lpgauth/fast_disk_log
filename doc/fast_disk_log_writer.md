@@ -5,8 +5,6 @@
 * [Function Index](#index)
 * [Function Details](#functions)
 
-
-
 <a name="types"></a>
 
 ## Data Types ##
@@ -17,11 +15,9 @@
 ### <a name="type-filename">filename()</a> ###
 
 
-
 <pre><code>
 filename() = <a href="file.md#type-name_all">file:name_all()</a>
 </code></pre>
-
 
 <a name="index"></a>
 
@@ -39,21 +35,17 @@ filename() = <a href="file.md#type-name_all">file:name_all()</a>
 
 ### init/3 ###
 
-
 <pre><code>
 init(Parent::pid(), Name::atom(), Filename::<a href="#type-filename">filename()</a>) -&gt; ok | no_return()
 </code></pre>
 <br />
 
-
 <a name="start_link-2"></a>
 
 ### start_link/2 ###
-
 
 <pre><code>
 start_link(Name::atom(), Filename::<a href="#type-filename">filename()</a>) -&gt; {ok, pid()}
 </code></pre>
 <br />
-
 

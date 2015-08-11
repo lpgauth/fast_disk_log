@@ -1,41 +1,31 @@
-PROJECT=fast_disk_log
-REBAR=./rebar
+REBAR=./rebar3
 
-all: deps compile doc
-
-build-plt: all
-	@dialyzer --build_plt --output_plt ~/.$(PROJECT).plt \
-		--apps erts kernel stdlib crypto public_key ssl
-
-check-plt:
-	@dialyzer --check_plt --plt ~/.$(PROJECT).plt
+all: compile
 
 clean:
-	@echo "Running rebar clean..."
-	@$(REBAR) clean
+	@echo "Running rebar3 clean..."
+	@$(REBAR) clean -a
 
 compile:
-	@echo "Running rebar compile..."
-	@$(REBAR) compile
+	@echo "Running rebar3 compile..."
+	@$(REBAR) as compile compile
 
-deps:
-	@echo "Running rebar update-deps..."
-	@$(REBAR) update-deps
+dialyzer:
+	@echo "Running rebar3 dialyze..."
+	@$(REBAR) dialyzer
 
-dialyze:
-	@dialyzer ebin/*.beam --plt ~/.$(PROJECT).plt -I include
-
-doc:
-	@echo "Running rebar doc..."
-	@$(REBAR) skip_deps=true doc
+edoc:
+	@echo "Running rebar3 edoc..."
+	@$(REBAR) as edoc edoc
 
 eunit:
-	@echo "Running rebar eunit..."
-	@$(REBAR) skip_deps=true eunit
+	@echo "Running rebar3 eunit..."
+	@$(REBAR) do eunit -cv, cover -v
 
-test: all eunit
+test: dialyzer eunit xref
 
 xref:
-	@$(REBAR) skip_deps=true xref
+	@echo "Running rebar3 xref..."
+	@$(REBAR) xref
 
-.PHONY: deps doc test xref
+.PHONY: edoc test xref
