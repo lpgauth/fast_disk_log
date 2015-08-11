@@ -70,6 +70,8 @@ sync(Name) ->
     end.
 
 %% private
+buffer_worker(Name, N) when is_list(Name) ->
+    buffer_worker(list_to_binary(Name), N);
 buffer_worker(Name, N) ->
     Buffer = <<Name/binary, "_buffer_", (integer_to_binary(N))/binary>>,
     binary_to_atom(Buffer, latin1).
@@ -117,6 +119,8 @@ start_writer_child(Name, Filename) ->
     Spec = ?CHILD(Writer, fast_disk_log_writer, [Writer, Filename]),
     {ok, _Pid} = supervisor:start_child(?SUPERVISOR, Spec).
 
+writer_worker(Name) when is_list(Name) ->
+    writer_worker(list_to_binary(Name));
 writer_worker(Name) ->
     Writer = <<Name/binary, "_writer">>,
     binary_to_atom(Writer, latin1).
