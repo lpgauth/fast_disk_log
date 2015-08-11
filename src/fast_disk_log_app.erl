@@ -2,7 +2,8 @@
 -include("fast_disk_log.hrl").
 
 -export([
-    start/0
+    start/0,
+    stop/0
 ]).
 
 -behaviour(application).
@@ -16,9 +17,18 @@
 start() ->
     application:start(?APP).
 
+-spec stop() -> ok | {error, {not_started, ?APP}}.
+
+stop() ->
+    application:stop(?APP).
+
 %% application callbacks
+-spec start(application:start_type(), term()) -> {ok, pid()}.
+
 start(_StartType, _StartArgs) ->
     fast_disk_log_sup:start_link().
+
+-spec stop(term()) -> ok.
 
 stop(_State) ->
     ok.

@@ -2,11 +2,8 @@
 -include_lib("eunit/include/eunit.hrl").
 -include_lib("fast_disk_log/include/fast_disk_log.hrl").
 
--compile(export_all).
-
 -define(LOGGER_NAME, <<"test_logger">>).
 -define(LOGGER_PATH, <<"./test.log">>).
--define(T, fun (Test) -> test(Test) end).
 
 %% runners
 fast_disk_logger_test_() ->
@@ -14,12 +11,12 @@ fast_disk_logger_test_() ->
         fun () -> setup() end,
         fun (_) -> cleanup() end,
     [
-        ?T(test_open_close),
-        ?T(test_log_sync)
+        fun open_close_subtest/0,
+        fun log_sync_subtest/0
     ]}.
 
 %% tests
-test_open_close() ->
+open_close_subtest() ->
     {error, no_such_log} = fast_disk_log:close(?LOGGER_NAME),
     ok = fast_disk_log:open(?LOGGER_NAME, ?LOGGER_PATH),
     {error, name_already_open} = fast_disk_log:open(?LOGGER_NAME, ?LOGGER_PATH),
@@ -27,7 +24,7 @@ test_open_close() ->
     ok = fast_disk_log:open(?LOGGER_NAME, ?LOGGER_PATH),
     ok = fast_disk_log:close(?LOGGER_NAME).
 
-test_log_sync() ->
+log_sync_subtest() ->
     log_delete(),
     {error, no_such_log} = fast_disk_log:log(?LOGGER_NAME, <<"test">>),
     {error, no_such_log} = fast_disk_log:sync(?LOGGER_NAME),
@@ -39,9 +36,8 @@ test_log_sync() ->
 
 %% utils
 cleanup() ->
-    error_logger:tty(false),
-    application:stop(?APP),
-    error_logger:tty(true).
+    fast_disk_log_app:stop(),
+    log_delete().
 
 log_delete() ->
     file:delete(?LOGGER_PATH).
@@ -57,19 +53,9 @@ read_loop(N, File) ->
         {ok, Line} ->
             [Line | read_loop(N - 1, File)];
         eof ->
-            timer:sleep(500),
             read_loop(N, File)
     end.
 
 setup() ->
-    setup([]).
-
-setup(KeyVals) ->
     error_logger:tty(false),
-    application:load(?APP),
-    [application:set_env(?APP, K, V) || {K, V} <- KeyVals],
-    fast_disk_log_app:start(),
-    error_logger:tty(true).
-
-test(Test) ->
-    {atom_to_list(Test), ?MODULE, Test}.
+    fast_disk_log_app:start().

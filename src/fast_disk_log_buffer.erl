@@ -81,10 +81,7 @@ handle_msg({log, Bin}, #state {
                 buffer = NewBuffer,
                 buffer_size = NewBufferSize
             }}
-    end;
-handle_msg(Msg, State) ->
-    ?WARNING_MSG("unknown msg: ~p~n", [Msg]),
-    {ok, State}.
+    end.
 
 loop(State) ->
     receive Msg ->

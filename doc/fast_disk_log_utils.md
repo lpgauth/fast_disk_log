@@ -4,7 +4,6 @@
 * [Function Index](#index)
 * [Function Details](#functions)
 
-
 <a name="index"></a>
 
 ## Function Index ##
@@ -21,34 +20,44 @@
 
 ### env/2 ###
 
-`env(Key, Default) -> any()`
-
+<pre><code>
+env(Key::atom(), Default::term()) -&gt; term()
+</code></pre>
+<br />
 
 <a name="error_msg-2"></a>
 
 ### error_msg/2 ###
 
-`error_msg(Format, Data) -> any()`
-
+<pre><code>
+error_msg(Format::string(), Data::[term()]) -&gt; ok
+</code></pre>
+<br />
 
 <a name="lookup-3"></a>
 
 ### lookup/3 ###
 
-`lookup(Key, List, Default) -> any()`
-
+<pre><code>
+lookup(Key::atom(), List::[{atom(), term()}], Default::term()) -&gt; term()
+</code></pre>
+<br />
 
 <a name="random-1"></a>
 
 ### random/1 ###
 
-`random(N) -> any()`
-
+<pre><code>
+random(N::pos_integer()) -&gt; pos_integer()
+</code></pre>
+<br />
 
 <a name="warning_msg-2"></a>
 
 ### warning_msg/2 ###
 
-`warning_msg(Format, Data) -> any()`
-
+<pre><code>
+warning_msg(Format::string(), Data::[term()]) -&gt; ok
+</code></pre>
+<br />
 
