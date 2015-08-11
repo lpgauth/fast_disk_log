@@ -16,7 +16,7 @@
 
 %% types
 -type filename() :: file:name_all().
--type name() :: binary().
+-type name() :: binary() | string().
 -type open_option() :: {pool_size, pos_integer()}.
 -type open_options() :: [open_option()].
 
