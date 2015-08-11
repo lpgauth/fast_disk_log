@@ -4,11 +4,11 @@ __Author:__ Louis-Philippe Gauthier.
 
 Pool-based asynchronous Erlang disk logger
 
-[![Build Status](https://travis-ci.org/lpgauth/fast_disk_log.svg?branch=dev)](https://travis-ci.org/lpgauth/fast_disk_log)
+[![Build Status](https://travis-ci.org/lpgauth/fast_disk_log.svg?branch=master)](https://travis-ci.org/lpgauth/fast_disk_log)
 
 ### Requirements
 
-* Erlang 16B03-1 +
+* Erlang 16.0 +
 
 ### Environment variables
 
@@ -34,7 +34,7 @@ Pool-based asynchronous Erlang disk logger
 </table>
 
 ## API
-<a href="http://github.com/lpgauth/fast_disk_log/blob/dev/doc/fast_disk_log.md#index" class="module">Function Index</a>
+<a href="http://github.com/lpgauth/fast_disk_log/blob/master/doc/fast_disk_log.md#index" class="module">Function Index</a>
 
 ## Examples
 
@@ -57,27 +57,6 @@ ok
 6> fast_disk_log:log(<<"2015-05-13-14">>, <<"{\"key\": \"value\"}\n">>).
 {error,no_such_log}
 ```
-
-## Modules
-
-<table width="100%" border="0" summary="list of modules">
-  <tr>
-    <td><a href="http://github.com/lpgauth/fast_disk_logger/blob/dev/doc/fast_disk_log.md" class="module">fast_disk_log</a></td>
-  </tr>
-  <tr>
-    <td><a href="http://github.com/lpgauth/fast_disk_logger/blob/dev/doc/fast_disk_log_app.md" class="module">fast_disk_log_app</a></td>
-  </tr>
-  <tr>
-    <td><a href="http://github.com/lpgauth/fast_disk_logger/blob/dev/doc/fast_disk_log_buffer.md" class="module">fast_disk_log_buffer</a></td>
-  </tr>
-  <tr><td><a href="http://github.com/lpgauth/fast_disk_logger/blob/dev/doc/fast_disk_log_sup.md" class="module">fast_disk_log_sup</a></td></tr>
-  <tr>
-    <td><a href="http://github.com/lpgauth/fast_disk_logger/blob/dev/doc/fast_disk_log_utils.md" class="module">fast_disk_log_utils</a></td>
-  </tr>
-  <tr>
-    <td><a href="http://github.com/lpgauth/fast_disk_logger/blob/dev/doc/fast_disk_log_writer.md" class="module">fast_disk_log_writer</a></td>
-  </tr>
-</table>
 
 ## Tests
 
