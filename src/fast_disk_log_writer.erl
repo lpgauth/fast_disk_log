@@ -2,37 +2,53 @@
 -include("fast_disk_log.hrl").
 
 -export([
-    init/3,
-    start_link/2
+    init/5,
+    start_link/4
 ]).
 
 -record(state, {
     fd,
-    name
+    logger,
+    name,
+    timer_delay,
+    timer_ref,
+    write_count = 0
 }).
 
 %% public
--spec init(pid(), atom(), filename()) -> ok | no_return().
+-spec init(pid(), atom(), name(), filename(), open_options()) -> ok | no_return().
 
-init(Parent, Name, Filename) ->
+init(Parent, Name, Logger, Filename, Opts) ->
     case file:open(Filename, [append, raw]) of
         {ok, Fd} ->
             register(Name, self()),
             proc_lib:init_ack(Parent, {ok, self()}),
 
-            loop(#state {
+            State = #state {
                 name = Name,
-                fd = Fd
-            });
+                fd = Fd,
+                logger = Logger
+            },
+
+            case ?LOOKUP(auto_close, Opts, ?DEFAULT_AUTO_CLOSE) of
+                true ->
+                    AutoCloseDelay = ?ENV(max_delay, ?DEFAULT_MAX_DELAY) * 2,
+                    loop(State#state {
+                        timer_delay = AutoCloseDelay,
+                        timer_ref = new_timer(AutoCloseDelay, auto_close)
+                    });
+                false ->
+                    loop(State)
+            end;
         {error, Reason} ->
             ?ERROR_MSG("failed to open file: ~p ~p~n", [Reason, Filename]),
             ok
     end.
 
--spec start_link(atom(), filename()) -> {ok, pid()}.
+-spec start_link(atom(), name(), filename(), open_options()) -> {ok, pid()}.
 
-start_link(Name, Filename) ->
-    proc_lib:start_link(?MODULE, init, [self(), Name, Filename]).
+start_link(Name, Logger, Filename, Opts) ->
+    proc_lib:start_link(?MODULE, init, [self(), Name, Logger, Filename, Opts]).
 
 %% private
 close_wait(0) ->
@@ -45,6 +61,18 @@ close_wait(N) ->
         []
     end.
 
+handle_msg(auto_close, #state {
+        write_count = 0,
+        logger = Logger
+    } = State) ->
+
+    spawn(fun () -> fast_disk_log:close(Logger) end),
+    {ok, State};
+handle_msg(auto_close, #state {timer_delay = TimerDelay} = State) ->
+    {ok, State#state {
+        timer_ref = new_timer(TimerDelay, auto_close),
+        write_count = 0
+    }};
 handle_msg({close, PoolSize, Pid}, #state {
         fd = Fd,
         name = Name
@@ -62,16 +90,26 @@ handle_msg({close, PoolSize, Pid}, #state {
     end,
     Pid ! {fast_disk_log, {closed, Name}},
     ok = supervisor:terminate_child(?SUPERVISOR, Name);
-handle_msg({write, Buffer}, #state {fd = Fd} = State) ->
+handle_msg({write, Buffer}, #state {
+        fd = Fd,
+        write_count = WriteCount
+    } = State) ->
+
     case file:write(Fd, Buffer) of
-        ok -> ok;
+        ok ->
+            {ok, State#state {
+                write_count = WriteCount + 1
+            }};
         {error, Reason} ->
-            ?ERROR_MSG("failed to write: ~p~n", [Reason])
-    end,
-    {ok, State}.
+            ?ERROR_MSG("failed to write: ~p~n", [Reason]),
+            {ok, State}
+    end.
 
 loop(State) ->
     receive Msg ->
         {ok, State2} = handle_msg(Msg, State),
         loop(State2)
     end.
+
+new_timer(Delay, Msg) ->
+    erlang:send_after(Delay, self(), Msg).

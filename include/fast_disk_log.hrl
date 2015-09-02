@@ -10,6 +10,7 @@
 -define(TABLE_NAME, fast_disk_log_manager).
 
 %% defaults
+-define(DEFAULT_AUTO_CLOSE, false).
 -define(DEFAULT_MAX_SIZE, 8000000).
 -define(DEFAULT_MAX_DELAY, 2000).
 -define(DEFAULT_POOL_SIZE, 4).
@@ -17,7 +18,7 @@
 %% types
 -type filename() :: file:name_all().
 -type name() :: binary() | string().
--type open_option() :: {pool_size, pos_integer()}.
+-type open_option() :: {auto_close, boolean()} | {pool_size, pos_integer()}.
 -type open_options() :: [open_option()].
 
 %% logging

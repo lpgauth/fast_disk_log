@@ -43,7 +43,7 @@ open(Name, Filename, Opts) ->
         true ->
             delete_writer_child(Name),
             delete_buffer_children(Name, PoolSize),
-            start_writer_child(Name, Filename),
+            start_writer_child(Name, Filename, Opts),
             start_buffer_children(Name, PoolSize),
             ok
     end.
@@ -114,9 +114,9 @@ start_buffer_child(Name, N) ->
     Spec = ?CHILD(Buffer, fast_disk_log_buffer, [Buffer, Writer]),
     {ok, _Pid} = supervisor:start_child(?SUPERVISOR, Spec).
 
-start_writer_child(Name, Filename) ->
+start_writer_child(Name, Filename, Opts) ->
     Writer = writer_worker(Name),
-    Spec = ?CHILD(Writer, fast_disk_log_writer, [Writer, Filename]),
+    Spec = ?CHILD(Writer, fast_disk_log_writer, [Writer, Name, Filename, Opts]),
     {ok, _Pid} = supervisor:start_child(?SUPERVISOR, Spec).
 
 writer_worker(Name) when is_list(Name) ->
