@@ -36,7 +36,7 @@ name() = binary() | string()
 
 
 <pre><code>
-open_option() = {pool_size, pos_integer()}
+open_option() = {auto_close, boolean()} | {pool_size, pos_integer()}
 </code></pre>
 
 
