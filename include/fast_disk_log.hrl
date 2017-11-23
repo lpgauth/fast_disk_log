@@ -17,7 +17,7 @@
 
 %% types
 -type filename() :: file:name_all().
--type name() :: binary() | string().
+-type name() :: atom() | binary() | string().
 -type open_option() :: {auto_close, boolean()} | {pool_size, pos_integer()}.
 -type open_options() :: [open_option()].
 

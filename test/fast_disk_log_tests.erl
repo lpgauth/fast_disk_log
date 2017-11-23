@@ -2,7 +2,7 @@
 -include_lib("eunit/include/eunit.hrl").
 -include_lib("fast_disk_log/include/fast_disk_log.hrl").
 
--define(LOGGER_NAME, <<"test_logger">>).
+-define(LOGGER_NAME, test_logger).
 -define(LOGGER_PATH, <<"./test.log">>).
 
 %% runners
