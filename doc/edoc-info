@@ -1,5 +1,4 @@
 %% encoding: UTF-8
 {application,fast_disk_log}.
-{packages,[]}.
 {modules,[fast_disk_log,fast_disk_log_app,fast_disk_log_buffer,
           fast_disk_log_sup,fast_disk_log_utils,fast_disk_log_writer]}.

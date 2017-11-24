@@ -26,7 +26,7 @@ filename() = <a href="file.md#type-name_all">file:name_all()</a>
 
 
 <pre><code>
-name() = binary() | string()
+name() = atom() | binary() | string()
 </code></pre>
 
 
