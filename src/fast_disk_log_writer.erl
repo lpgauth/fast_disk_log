@@ -83,10 +83,15 @@ handle_msg({close, PoolSize, Pid}, #state {
         {error, Reason} ->
             ?ERROR_MSG("failed to write: ~p~n", [Reason])
     end,
-    case file:close(Fd) of
+    case file:sync(Fd) of
         ok -> ok;
         {error, Reason2} ->
-            ?ERROR_MSG("failed to close: ~p~n", [Reason2])
+            ?ERROR_MSG("failed to sync: ~p~n", [Reason2])
+    end,
+    case file:close(Fd) of
+        ok -> ok;
+        {error, Reason3} ->
+            ?ERROR_MSG("failed to close: ~p~n", [Reason3])
     end,
     Pid ! {fast_disk_log, {closed, Name}},
     ok = supervisor:terminate_child(?SUPERVISOR, Name);
