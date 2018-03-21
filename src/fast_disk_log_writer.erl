@@ -12,7 +12,8 @@
     name,
     timer_delay,
     timer_ref,
-    write_count = 0
+    write_count = 0,
+    zstream
 }).
 
 %% public
@@ -30,15 +31,24 @@ init(Parent, Name, Logger, Filename, Opts) ->
                 logger = Logger
             },
 
-            case ?LOOKUP(auto_close, Opts, ?DEFAULT_AUTO_CLOSE) of
+            State2 = case ?LOOKUP(auto_close, Opts, ?DEFAULT_AUTO_CLOSE) of
                 true ->
                     AutoCloseDelay = ?ENV(max_delay, ?DEFAULT_MAX_DELAY) * 2,
-                    loop(State#state {
+                    State#state {
                         timer_delay = AutoCloseDelay,
                         timer_ref = new_timer(AutoCloseDelay, auto_close)
+                    };
+                false ->
+                    State
+            end,
+
+            case ?LOOKUP(compression, Opts, ?DEFAULT_COMPRESSION) of
+                true ->
+                    loop(State2#state {
+                        zstream = zlib_open()
                     });
                 false ->
-                    loop(State)
+                    loop(State2)
             end;
         {error, Reason} ->
             ?ERROR_MSG("failed to open file: ~p ~p~n", [Reason, Filename]),
@@ -75,10 +85,14 @@ handle_msg(auto_close, #state {timer_delay = TimerDelay} = State) ->
     }};
 handle_msg({close, PoolSize, Pid}, #state {
         fd = Fd,
-        name = Name
+        name = Name,
+        zstream = Zstream
     }) ->
+
     Buffer = lists:reverse(close_wait(PoolSize)),
-    case file:write(Fd, Buffer) of
+    Buffer2 = zlib_close(Zstream, Buffer),
+
+    case file:write(Fd, Buffer2) of
         ok -> ok;
         {error, Reason} ->
             ?ERROR_MSG("failed to write: ~p~n", [Reason])
@@ -97,10 +111,13 @@ handle_msg({close, PoolSize, Pid}, #state {
     ok = supervisor:terminate_child(?SUPERVISOR, Name);
 handle_msg({write, Buffer}, #state {
         fd = Fd,
-        write_count = WriteCount
+        write_count = WriteCount,
+        zstream = Zstream
     } = State) ->
 
-    case file:write(Fd, Buffer) of
+    Buffer2 = zlib_compress(Zstream, Buffer),
+
+    case file:write(Fd, Buffer2) of
         ok ->
             {ok, State#state {
                 write_count = WriteCount + 1
@@ -118,3 +135,21 @@ loop(State) ->
 
 new_timer(Delay, Msg) ->
     erlang:send_after(Delay, self(), Msg).
+
+zlib_compress(undefined, Data) ->
+    Data;
+zlib_compress(Zstream, Data) ->
+    zlib:deflate(Zstream, Data).
+
+zlib_close(undefined, Data) ->
+    Data;
+zlib_close(Zstream, Data) ->
+    Data2 = zlib:deflate(Zstream, Data, finish),
+    ok = zlib:deflateEnd(Zstream),
+    ok = zlib:close(Zstream),
+    Data2.
+
+zlib_open() ->
+    Zstream = zlib:open(),
+    zlib:deflateInit(Zstream, default, deflated, 31, 8, default),
+    Zstream.
